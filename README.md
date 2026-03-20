@@ -1,17 +1,17 @@
-# Daily Briefing Skill
+# Daily Briefing Skill v2
 
-**OpenClaw/SuperAgents skill for automated daily briefing emails**
+**OpenClaw/SuperAgents skill for automated daily briefings with scheduling and multiple source types**
 
-Generate personalized daily briefing emails with curated AI news, newsletters, and content from configurable sources.
+Create multiple personalized briefings with built-in scheduling - no external cron needed.
 
 ## Features
 
-- 📰 **Newsletter scanning** - Scans email inbox for newsletters from configurable senders
-- 🤖 **Web scraping** - Extracts articles from sites with JSON data (Next.js, etc.)
-- 📡 **RSS feeds** - Parses any RSS/Atom feed
-- 📧 **Email delivery** - Sends formatted HTML briefings via Microsoft Middleware
-- 🔧 **REST API** - Full configuration via API (no CLI required)
+- 📋 **Multiple briefs** - Morning summary, meeting prep, weekly digest, etc.
+- ⏰ **Built-in scheduler** - Configure schedules via API, no cron needed
+- 📡 **7 source types** - RSS, web, email, calendar, tasks, podcast, weather
 - ✅ **Source testing** - Validates sources before adding
+- 📧 **Email delivery** - Sends formatted HTML via Microsoft Middleware
+- 🔧 **Full REST API** - Configure everything via API (SuperAgents compatible)
 
 ---
 
@@ -25,16 +25,24 @@ cd daily-briefing-skill
 # Install
 npm install
 
-# Start API server
+# Start API server (includes scheduler)
 npm start
 # → http://localhost:3020
-
-# Run briefing immediately
-npm run run
-
-# Dry run (preview without sending)
-npm run run:dry
 ```
+
+---
+
+## Source Types
+
+| Type | Icon | Description | Example |
+|------|------|-------------|---------|
+| `rss` | 📡 | RSS/Atom feeds | Substack, blogs, news |
+| `web-json` | 🌐 | Web pages with JSON | The Verge, modern sites |
+| `email` | 📧 | Newsletter inbox | Filter by sender |
+| `calendar` | 📅 | Calendar events | Today's meetings |
+| `tasks` | ✅ | Task lists | Todoist, Microsoft To Do |
+| `podcast` | 🎙️ | Podcast episodes | Any podcast RSS |
+| `weather` | 🌤️ | Weather forecast | Any location |
 
 ---
 
@@ -42,182 +50,230 @@ npm run run:dry
 
 **Base URL:** `http://localhost:3020`
 
-### Configuration
+### Briefs
 
-#### GET /api/config
-Returns full configuration.
-
-```bash
-curl http://localhost:3020/api/config
-```
-
-**Response:**
-```json
-{
-  "enabled": true,
-  "schedule": "0 7 * * *",
-  "timezone": "Europe/London",
-  "delivery": {
-    "method": "email",
-    "agent": "max",
-    "recipients": ["user@example.com"]
-  },
-  "sources": [...],
-  "lastRun": null,
-  "version": "1.0.0"
-}
-```
-
-#### PUT /api/config
-Update configuration (partial update supported).
+#### GET /api/briefs
+List all briefs.
 
 ```bash
-curl -X PUT http://localhost:3020/api/config \
+curl http://localhost:3020/api/briefs
+```
+
+#### POST /api/briefs
+Create a new brief.
+
+```bash
+curl -X POST http://localhost:3020/api/briefs \
   -H "Content-Type: application/json" \
   -d '{
-    "schedule": "0 8 * * *",
+    "name": "Morning Tech Brief",
+    "schedule": "0 7 * * *",
+    "timezone": "Europe/London",
     "delivery": {
-      "recipients": ["newuser@example.com"]
+      "agent": "max",
+      "recipients": ["user@example.com"]
     }
   }'
 ```
 
-### Sources
+**Response:**
+```json
+{
+  "success": true,
+  "brief": {
+    "id": "abc123",
+    "name": "Morning Tech Brief",
+    "enabled": true,
+    "schedule": "0 7 * * *",
+    "sources": [],
+    "createdAt": "2026-03-20T10:00:00Z"
+  }
+}
+```
 
-#### GET /api/sources
-List all configured sources.
+#### PUT /api/briefs/:id
+Update a brief.
 
 ```bash
-curl http://localhost:3020/api/sources
+curl -X PUT http://localhost:3020/api/briefs/abc123 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Brief Name",
+    "enabled": false
+  }'
+```
+
+#### DELETE /api/briefs/:id
+Delete a brief.
+
+```bash
+curl -X DELETE http://localhost:3020/api/briefs/abc123
+```
+
+#### POST /api/briefs/:id/run
+Run a brief immediately.
+
+```bash
+# Run and send
+curl -X POST http://localhost:3020/api/briefs/abc123/run
+
+# Dry run (preview without sending)
+curl -X POST http://localhost:3020/api/briefs/abc123/run \
+  -H "Content-Type: application/json" \
+  -d '{"dryRun": true}'
+```
+
+### Sources
+
+#### GET /api/briefs/:id/sources
+List sources for a brief.
+
+```bash
+curl http://localhost:3020/api/briefs/abc123/sources
+```
+
+#### POST /api/briefs/:id/sources
+Add a source (auto-tests before saving).
+
+```bash
+# RSS Feed
+curl -X POST http://localhost:3020/api/briefs/abc123/sources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Hacker News",
+    "type": "rss",
+    "url": "https://news.ycombinator.com/rss",
+    "config": {"maxItems": 10}
+  }'
+
+# Calendar
+curl -X POST http://localhost:3020/api/briefs/abc123/sources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Today'\''s Meetings",
+    "type": "calendar",
+    "config": {"agent": "luca", "days": 1}
+  }'
+
+# Email Newsletters
+curl -X POST http://localhost:3020/api/briefs/abc123/sources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Newsletters",
+    "type": "email",
+    "config": {
+      "agent": "luca",
+      "senders": ["therundown", "morningbrew"],
+      "maxAge": "24h"
+    }
+  }'
+
+# Tasks
+curl -X POST http://localhost:3020/api/briefs/abc123/sources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Today'\''s Tasks",
+    "type": "tasks",
+    "config": {"provider": "todoist"}
+  }'
+
+# Podcast
+curl -X POST http://localhost:3020/api/briefs/abc123/sources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Last Week in AI",
+    "type": "podcast",
+    "url": "https://lastweekinai.substack.com/feed",
+    "config": {"maxItems": 3}
+  }'
+
+# Weather
+curl -X POST http://localhost:3020/api/briefs/abc123/sources \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "London Weather",
+    "type": "weather",
+    "config": {"location": "London", "units": "metric"}
+  }'
+```
+
+#### DELETE /api/briefs/:id/sources/:sourceId
+Remove a source.
+
+```bash
+curl -X DELETE http://localhost:3020/api/briefs/abc123/sources/xyz789
+```
+
+#### POST /api/briefs/:id/sources/:sourceId/test
+Test a specific source.
+
+```bash
+curl -X POST http://localhost:3020/api/briefs/abc123/sources/xyz789/test
+```
+
+### Scheduling
+
+#### GET /api/schedules
+List all scheduled jobs.
+
+```bash
+curl http://localhost:3020/api/schedules
 ```
 
 **Response:**
 ```json
 {
-  "sources": [
+  "schedules": [
     {
       "id": "abc123",
-      "name": "TechCrunch",
-      "type": "rss",
-      "url": "https://techcrunch.com/feed/",
-      "enabled": true,
-      "lastTest": {
-        "success": true,
-        "timestamp": "2026-03-20T10:00:00Z",
-        "itemCount": 10
-      }
+      "name": "Morning Tech Brief",
+      "schedule": "0 7 * * *",
+      "running": true,
+      "nextRun": "2026-03-21T07:00:00.000Z"
     }
   ]
 }
 ```
 
-#### POST /api/sources
-Add a new source. **Automatically tests before saving** - fails if source can't be fetched.
+#### GET /api/schedules/presets
+Get schedule presets for UI dropdowns.
 
 ```bash
-curl -X POST http://localhost:3020/api/sources \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Hacker News",
-    "type": "rss",
-    "url": "https://news.ycombinator.com/rss",
-    "config": {
-      "maxItems": 10
-    }
-  }'
-```
-
-**Success Response:**
-```json
-{
-  "success": true,
-  "source": {
-    "id": "xyz789",
-    "name": "Hacker News",
-    "type": "rss",
-    "url": "https://news.ycombinator.com/rss",
-    "enabled": true
-  },
-  "testResult": {
-    "itemCount": 10,
-    "sampleItems": [
-      {"title": "Article 1", "url": "..."},
-      {"title": "Article 2", "url": "..."}
-    ]
-  }
-}
-```
-
-**Failure Response (source couldn't be fetched):**
-```json
-{
-  "success": false,
-  "error": "Source test failed: Connection timeout",
-  "testResult": {
-    "success": false,
-    "error": "Connection timeout"
-  }
-}
-```
-
-#### DELETE /api/sources/:id
-Remove a source.
-
-```bash
-curl -X DELETE http://localhost:3020/api/sources/abc123
-```
-
-#### POST /api/sources/:id/test
-Test a specific source without modifying config.
-
-```bash
-curl -X POST http://localhost:3020/api/sources/abc123/test
+curl http://localhost:3020/api/schedules/presets
 ```
 
 **Response:**
 ```json
 {
-  "success": true,
-  "itemCount": 8,
-  "sampleItems": [...],
-  "responseTime": 1234
+  "presets": [
+    {"label": "Every morning at 7 AM", "value": "0 7 * * *"},
+    {"label": "Weekday mornings at 8:30 AM", "value": "30 8 * * 1-5"},
+    {"label": "Sunday evening at 8 PM", "value": "0 20 * * 0"}
+  ]
 }
+```
+
+#### POST /api/briefs/:id/schedule
+Update brief schedule.
+
+```bash
+curl -X POST http://localhost:3020/api/briefs/abc123/schedule \
+  -H "Content-Type: application/json" \
+  -d '{
+    "schedule": "30 8 * * 1-5",
+    "enabled": true
+  }'
 ```
 
 ### Testing
 
-#### POST /api/test
-Test all enabled sources.
-
-```bash
-curl -X POST http://localhost:3020/api/test
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "results": [
-    {"sourceId": "abc", "sourceName": "TechCrunch", "success": true, "itemCount": 10},
-    {"sourceId": "xyz", "sourceName": "HN", "success": false, "error": "Timeout"}
-  ],
-  "summary": {"total": 2, "passed": 1, "failed": 1}
-}
-```
-
 #### POST /api/test/url
-Test a URL before adding as source. Auto-detects source type if not specified.
+Test a URL (auto-detect source type).
 
 ```bash
-# With explicit type
 curl -X POST http://localhost:3020/api/test/url \
   -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com/feed.xml", "type": "rss"}'
-
-# Auto-detect type
-curl -X POST http://localhost:3020/api/test/url \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com/feed.xml"}'
+  -d '{"url": "https://techcrunch.com/feed/"}'
 ```
 
 **Response:**
@@ -225,41 +281,23 @@ curl -X POST http://localhost:3020/api/test/url \
 {
   "success": true,
   "detectedType": "rss",
-  "itemCount": 15,
+  "itemCount": 10,
   "sampleItems": [...],
-  "suggestedName": "Example"
+  "suggestedName": "Techcrunch"
 }
 ```
 
-### Execution
-
-#### POST /api/run
-Run the briefing immediately.
+#### GET /api/source-types
+List available source types with config schemas.
 
 ```bash
-# Send briefing now
-curl -X POST http://localhost:3020/api/run
-
-# Dry run (no email sent)
-curl -X POST http://localhost:3020/api/run \
-  -H "Content-Type: application/json" \
-  -d '{"dryRun": true}'
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "dryRun": false,
-  "exitCode": 0,
-  "output": "🌅 Starting Daily Briefing...\n..."
-}
+curl http://localhost:3020/api/source-types
 ```
 
 ### Status
 
 #### GET /api/status
-Health check and execution status.
+Health check and scheduler status.
 
 ```bash
 curl http://localhost:3020/api/status
@@ -269,95 +307,19 @@ curl http://localhost:3020/api/status
 ```json
 {
   "status": "ok",
-  "version": "1.0.0",
-  "enabled": true,
-  "schedule": "0 7 * * *",
-  "lastRun": {
-    "timestamp": "2026-03-20T07:00:00Z",
-    "success": true
+  "version": "2.0.0",
+  "briefs": {"total": 2, "enabled": 2},
+  "scheduler": {
+    "running": 2,
+    "jobs": [...]
   },
-  "nextRun": "2026-03-21T07:00:00Z",
-  "sources": {
-    "total": 3,
-    "enabled": 3,
-    "healthy": 2
-  }
+  "sourceTypes": 7
 }
 ```
-
-### Schema
-
-#### GET /api/schema
-JSON Schema for UI form generation.
-
-```bash
-curl http://localhost:3020/api/schema
-```
-
----
-
-## Source Types
-
-### RSS (`type: "rss"`)
-Standard RSS/Atom feed parser.
-
-```json
-{
-  "name": "Hacker News",
-  "type": "rss",
-  "url": "https://news.ycombinator.com/rss",
-  "config": {
-    "maxItems": 10
-  }
-}
-```
-
-**Works with:** Any RSS/Atom feed, Substack, WordPress, most blogs.
-
-### Web JSON (`type: "web-json"`)
-Extracts articles from sites with embedded JSON (Next.js `__NEXT_DATA__`, etc.)
-
-```json
-{
-  "name": "The Verge AI",
-  "type": "web-json",
-  "url": "https://www.theverge.com/ai-artificial-intelligence",
-  "config": {
-    "maxItems": 8
-  }
-}
-```
-
-**Works with:** Next.js sites, The Verge, many modern news sites.
-
-### Email (`type: "email"`)
-Scans inbox for newsletters from specific senders.
-
-```json
-{
-  "name": "Newsletters",
-  "type": "email",
-  "url": "inbox",
-  "config": {
-    "agent": "luca",
-    "senders": ["therundown", "morningbrew", "axios"],
-    "maxAge": "24h"
-  }
-}
-```
-
-**Requires:** Microsoft Middleware running on localhost:3007.
-
-**Config options:**
-- `agent` - Microsoft Middleware agent name to scan inbox
-- `senders` - Array of sender keywords (matches email address or name)
-- `maxAge` - How far back to look: `24h`, `48h`, `7d`, etc.
 
 ---
 
 ## Agent Configuration Guide
-
-**For AI agents configuring this skill:**
 
 ### Step 1: Start the server
 ```bash
@@ -366,52 +328,84 @@ npm install
 npm start
 ```
 
-### Step 2: Configure delivery
+### Step 2: Create a brief
 ```bash
-curl -X PUT http://localhost:3020/api/config \
+curl -X POST http://localhost:3020/api/briefs \
   -H "Content-Type: application/json" \
   -d '{
+    "name": "Morning Brief",
+    "schedule": "0 7 * * *",
     "delivery": {
       "agent": "max",
       "recipients": ["user@example.com"]
     }
   }'
 ```
+Save the returned `id`.
 
 ### Step 3: Add sources
-Test URL first, then add if successful:
+For each source, test first then add:
+
 ```bash
-# Test
+# Test URL
 curl -X POST http://localhost:3020/api/test/url \
   -H "Content-Type: application/json" \
   -d '{"url": "https://news.ycombinator.com/rss"}'
 
-# Add (only if test succeeded)
-curl -X POST http://localhost:3020/api/sources \
+# If successful, add to brief
+curl -X POST http://localhost:3020/api/briefs/{id}/sources \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Hacker News",
-    "type": "rss", 
+    "type": "rss",
     "url": "https://news.ycombinator.com/rss"
   }'
 ```
 
-### Step 4: Test all sources
+### Step 4: Verify schedule
 ```bash
-curl -X POST http://localhost:3020/api/test
+curl http://localhost:3020/api/schedules
 ```
 
-### Step 5: Run a test briefing
+### Step 5: Test run
 ```bash
-curl -X POST http://localhost:3020/api/run \
+curl -X POST http://localhost:3020/api/briefs/{id}/run \
   -H "Content-Type: application/json" \
   -d '{"dryRun": true}'
 ```
 
-### Step 6: Schedule with cron
+---
+
+## Example Brief Configurations
+
+### Morning Tech Brief
 ```bash
-# Add to crontab (runs at 7 AM daily)
-(crontab -l 2>/dev/null; echo "0 7 * * * cd /path/to/skill && node scripts/daily-briefing.js >> /var/log/briefing.log 2>&1") | crontab -
+# Create brief
+curl -X POST http://localhost:3020/api/briefs -H "Content-Type: application/json" \
+  -d '{"name": "Morning Tech Brief", "schedule": "0 7 * * 1-5", "delivery": {"agent": "max", "recipients": ["me@work.com"]}}'
+
+# Add sources
+curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: application/json" \
+  -d '{"name": "Hacker News", "type": "rss", "url": "https://news.ycombinator.com/rss"}'
+
+curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: application/json" \
+  -d '{"name": "Today'\''s Calendar", "type": "calendar", "config": {"agent": "luca", "days": 1}}'
+
+curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: application/json" \
+  -d '{"name": "My Tasks", "type": "tasks", "config": {"provider": "todoist"}}'
+```
+
+### Weekly AI Digest
+```bash
+curl -X POST http://localhost:3020/api/briefs -H "Content-Type: application/json" \
+  -d '{"name": "Weekly AI Digest", "schedule": "0 20 * * 0", "delivery": {"agent": "max", "recipients": ["me@home.com"]}}'
+
+# Add AI-focused sources
+curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: application/json" \
+  -d '{"name": "The Verge AI", "type": "web-json", "url": "https://www.theverge.com/ai-artificial-intelligence"}'
+
+curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: application/json" \
+  -d '{"name": "Last Week in AI", "type": "podcast", "url": "https://lastweekinai.substack.com/feed"}'
 ```
 
 ---
@@ -423,13 +417,15 @@ curl -X POST http://localhost:3020/api/run \
 | `PORT` | `3020` | API server port |
 | `MIDDLEWARE_API` | `http://localhost:3007/api` | Microsoft Middleware URL |
 | `CONFIG_DIR` | `./config` | Config storage directory |
+| `TZ` | `Europe/London` | Default timezone |
+| `TODOIST_SCRIPT` | `/home/lucalicata/clawd/todoist.js` | Todoist CLI path |
 
 ---
 
 ## Requirements
 
 - **Node.js** 18+
-- **Microsoft Middleware** (for email delivery) - https://github.com/Diomede81/openclaw_microsoft_middleware
+- **Microsoft Middleware** (for email/calendar/tasks) - optional but recommended
 
 ---
 
@@ -441,14 +437,16 @@ daily-briefing-skill/
 ├── README.md             # This file
 ├── package.json
 ├── config/
-│   └── config.json       # Persisted configuration
+│   └── config.json       # Briefs and sources
 ├── scripts/
-│   ├── server.js         # API server (npm start)
-│   └── daily-briefing.js # Main runner (npm run run)
+│   ├── server.js         # API server with scheduler
+│   ├── daily-briefing.js # Legacy single-brief runner
+│   └── run-brief.js      # Run specific brief by ID
 └── lib/
-    ├── config-manager.js # Config CRUD operations
+    ├── config-manager.js # Multi-brief config management
+    ├── scheduler.js      # Built-in cron scheduler
     └── adapters/
-        └── index.js      # Source type parsers (RSS, web-json, email)
+        └── index.js      # Source type parsers
 ```
 
 ---

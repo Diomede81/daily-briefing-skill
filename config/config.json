@@ -1,4 +1,25 @@
 {
+  "version": "1.0.0",
+  "defaultTimezone": "Europe/London",
+  "briefs": [
+    {
+      "name": "Morning Tech Brief",
+      "enabled": true,
+      "schedule": "0 7 * * *",
+      "timezone": "Europe/London",
+      "delivery": {
+        "agent": "max",
+        "recipients": [
+          "luca@example.com"
+        ]
+      },
+      "sources": [],
+      "lastRun": null,
+      "id": "38cdfbc6",
+      "createdAt": "2026-03-20T11:46:56.899Z"
+    }
+  ],
+  "sourceTemplates": {},
   "enabled": true,
   "schedule": "0 7 * * *",
   "timezone": "Europe/London",
@@ -18,6 +39,5 @@
       "createdAt": "2026-03-20T11:37:33.189Z"
     }
   ],
-  "lastRun": null,
-  "version": "1.0.0"
+  "lastRun": null
 }
