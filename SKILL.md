@@ -124,11 +124,48 @@ daily-briefing-skill/
 | MIDDLEWARE_API | http://localhost:3007/api | Microsoft middleware URL |
 | CONFIG_DIR | ./config | Config storage directory |
 
-## Scheduling
+## Scheduling with OpenClaw Cron
 
-Use cron to run on schedule:
+The skill integrates with OpenClaw's cron system for reliable, persistent scheduling that survives restarts.
+
+### Cron API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/cron | List all briefing cron jobs |
+| POST | /api/briefs/:id/cron | Create/update cron job for brief |
+| DELETE | /api/briefs/:id/cron | Remove cron job for brief |
+| POST | /api/briefs/:id/cron/run | Trigger cron job immediately |
+
+### Create Cron Job for a Brief
+```bash
+# Create/update cron job (uses brief's schedule config)
+curl -X POST http://localhost:3020/api/briefs/my-brief-id/cron
+
+# Response:
+# { "success": true, "jobName": "daily-briefing-my-brief-id", "schedule": "0 8 * * *" }
+```
+
+### Run Brief Immediately via Cron
+```bash
+curl -X POST http://localhost:3020/api/briefs/my-brief-id/cron/run
+```
+
+### List All Briefing Cron Jobs
+```bash
+curl http://localhost:3020/api/cron
+```
+
+### How It Works
+1. When you call `POST /api/briefs/:id/cron`, the skill:
+   - Reads the brief's `schedule` field (cron expression)
+   - Creates an OpenClaw cron job named `daily-briefing-{brief-id}`
+   - Sets it to run an isolated agent turn that executes the briefing
+2. OpenClaw handles the scheduling and runs the job even if this API server is stopped
+3. Any interface (Mission Control, CLI, mobile app) can use these endpoints
+
+### Legacy System Cron (Alternative)
+You can still use system cron directly if needed:
 ```bash
 0 7 * * * cd /path/to/skill && node scripts/daily-briefing.js >> /var/log/briefing.log 2>&1
 ```
-
-Or configure via API and use a job runner.
