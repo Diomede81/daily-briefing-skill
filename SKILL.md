@@ -1,6 +1,6 @@
 ---
 name: daily-briefing
-description: Generate and send personalized daily briefing emails with AI news, newsletters, and curated content. Use when: user asks for a daily briefing, morning summary, news digest, or wants to set up automated daily emails with AI/tech news. Supports custom sources, email delivery via Microsoft 365, and scheduled cron execution.
+description: Generate and send personalized daily briefing emails with AI news, newsletters, and curated content. Use when user asks for a daily briefing, morning summary, news digest, or wants to configure automated daily emails. Supports REST API for UI configuration, custom sources (RSS, web, email), and scheduled cron execution.
 ---
 
 # Daily Briefing Skill
@@ -10,113 +10,125 @@ Generate personalized daily briefing emails with curated AI news and newsletter 
 ## Quick Start
 
 ```bash
-# Run briefing now (sends email immediately)
-node scripts/daily-briefing.js
+# Install dependencies
+npm install
 
-# Test without sending (dry run)
-node scripts/daily-briefing.js --dry-run
+# Start API server (for UI configuration)
+npm start
+# → http://localhost:3020
 
-# Schedule daily at 7 AM
-(crontab -l 2>/dev/null; echo "0 7 * * * $(which node) $(pwd)/scripts/daily-briefing.js >> ~/briefing.log 2>&1") | crontab -
+# Run briefing immediately
+npm run run
+
+# Dry run (no email sent)
+npm run run:dry
 ```
 
-## Requirements
+## API Endpoints
 
-- **Microsoft Middleware API** running on `localhost:3007` (for email send/receive)
-- **Node.js** 18+
-- Agent configured in middleware with email permissions
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /api/config | Get full configuration |
+| PUT | /api/config | Update configuration |
+| GET | /api/sources | List all sources |
+| POST | /api/sources | Add source (tests first) |
+| DELETE | /api/sources/:id | Remove source |
+| POST | /api/sources/:id/test | Test specific source |
+| POST | /api/test | Test all sources |
+| POST | /api/test/url | Test URL before adding |
+| POST | /api/run | Run briefing now |
+| GET | /api/status | Health and status |
+| GET | /api/schema | JSON Schema for UI |
 
 ## Configuration
 
-Edit `scripts/daily-briefing.js` to customize:
+### Via API
+```bash
+# Get current config
+curl http://localhost:3020/api/config
 
-### Email Settings
-```javascript
-const CONFIG = {
-  MIDDLEWARE_API: 'http://localhost:3007/api',
-  SEND_FROM_AGENT: 'max',           // Middleware agent name
-  SEND_TO: 'user@example.com',       // Recipient email
-  INBOX_AGENT: 'luca',               // Agent whose inbox to scan for newsletters
-};
+# Update schedule
+curl -X PUT http://localhost:3020/api/config \
+  -H "Content-Type: application/json" \
+  -d '{"schedule": "0 8 * * *"}'
+
+# Add a source (tests automatically)
+curl -X POST http://localhost:3020/api/sources \
+  -H "Content-Type: application/json" \
+  -d '{"name": "TechCrunch", "type": "rss", "url": "https://techcrunch.com/feed/"}'
+
+# Test all sources
+curl -X POST http://localhost:3020/api/test
 ```
 
-### Newsletter Sources
-```javascript
-const NEWSLETTER_SENDERS = [
-  'therundown',      // The Rundown AI
-  'morningbrew',     // Morning Brew
-  'platformer',      // Platformer
-  'axios',           // Axios
-  // Add more sender keywords...
-];
+### Source Types
+
+| Type | Use For | Config Options |
+|------|---------|----------------|
+| `rss` | RSS/Atom feeds | `maxItems` |
+| `web-json` | Sites with __NEXT_DATA__ | `maxItems`, `jsonPath` |
+| `email` | Newsletter inbox | `agent`, `senders`, `maxAge` |
+
+### Example: Add RSS Source
+```json
+{
+  "name": "Hacker News",
+  "type": "rss",
+  "url": "https://news.ycombinator.com/rss",
+  "config": { "maxItems": 10 }
+}
 ```
 
-### News Sources
-The script fetches from:
-1. **The Verge AI** - Extracts articles from theverge.com/ai-artificial-intelligence
-2. **Last Week in AI** - Substack newsletter (lastweekinai.substack.com)
-
-## Output
-
-Sends an HTML email containing:
-1. **📰 Newsletters** - Recent newsletters from configured senders (last 24h)
-2. **🤖 AI News** - Latest articles from The Verge AI section
-3. **🎙️ Last Week in AI** - Recent posts from the Substack
-
-Also saves a markdown summary to `memory/daily-briefing/YYYY-MM-DD.md`.
-
-## Customization
-
-### Add Custom News Source
-
-Add a new async function following this pattern:
-
-```javascript
-async function getCustomSource() {
-  console.log('📡 Fetching from Custom Source...');
-  try {
-    const html = execSync('curl -sL "https://example.com/feed" --max-time 20', { encoding: 'utf8' });
-    // Parse and return array of { title, url, author? }
-    return articles;
-  } catch (err) {
-    console.log(`   ⚠️ Custom source failed: ${err.message}`);
-    return [];
+### Example: Add Email Source
+```json
+{
+  "name": "Newsletters",
+  "type": "email",
+  "url": "inbox",
+  "config": {
+    "agent": "luca",
+    "senders": ["therundown", "morningbrew"],
+    "maxAge": "24h"
   }
 }
 ```
 
-Then add to `buildAndSendBriefing()` and update the HTML template.
+## Requirements
 
-### Change Schedule
-
-```bash
-# View current cron
-crontab -l | grep briefing
-
-# Remove existing
-crontab -l | grep -v briefing | crontab -
-
-# Add new schedule (e.g., 8:30 AM)
-(crontab -l 2>/dev/null; echo "30 8 * * * /path/to/node /path/to/daily-briefing.js") | crontab -
-```
-
-## Troubleshooting
-
-### "Email send failed"
-- Check middleware is running: `curl http://localhost:3007/health`
-- Verify agent has email permissions in middleware config
-- Check agent token is valid: `ms-middleware token-device <agent>`
-
-### "No newsletters found"
-- Verify `INBOX_AGENT` is correct
-- Check `NEWSLETTER_SENDERS` matches your subscriptions
-- Confirm emails exist in last 24 hours
-
-### "AI news fetch failed"
-- The Verge structure may have changed - check if JSON extraction still works
-- Try increasing curl timeout
-- Check network connectivity
+- **Node.js** 18+
+- **Microsoft Middleware** on localhost:3007 (for email delivery)
+- Agent configured with email permissions
 
 ## Files
 
-- `scripts/daily-briefing.js` - Main script (run directly or via cron)
+```
+daily-briefing-skill/
+├── SKILL.md              # This file
+├── package.json          # Dependencies
+├── config/
+│   └── config.json       # Persisted configuration
+├── scripts/
+│   ├── server.js         # API server
+│   └── daily-briefing.js # Main runner
+└── lib/
+    ├── config-manager.js # Config CRUD
+    └── adapters/
+        └── index.js      # Source parsers
+```
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| PORT | 3020 | API server port |
+| MIDDLEWARE_API | http://localhost:3007/api | Microsoft middleware URL |
+| CONFIG_DIR | ./config | Config storage directory |
+
+## Scheduling
+
+Use cron to run on schedule:
+```bash
+0 7 * * * cd /path/to/skill && node scripts/daily-briefing.js >> /var/log/briefing.log 2>&1
+```
+
+Or configure via API and use a job runner.

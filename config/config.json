@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "schedule": "0 7 * * *",
+  "timezone": "Europe/London",
+  "delivery": {
+    "method": "email",
+    "agent": "max",
+    "recipients": []
+  },
+  "sources": [
+    {
+      "id": "48e2f7aa",
+      "name": "TechCrunch",
+      "type": "rss",
+      "url": "https://techcrunch.com/feed/",
+      "lastTest": null,
+      "enabled": true,
+      "createdAt": "2026-03-20T11:37:33.189Z"
+    }
+  ],
+  "lastRun": null,
+  "version": "1.0.0"
+}

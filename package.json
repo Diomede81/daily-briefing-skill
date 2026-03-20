@@ -1,0 +1,18 @@
+{
+  "name": "daily-briefing-skill",
+  "version": "1.0.0",
+  "description": "OpenClaw skill for automated daily briefing emails with AI news and newsletters",
+  "main": "scripts/server.js",
+  "scripts": {
+    "start": "node scripts/server.js",
+    "run": "node scripts/daily-briefing.js",
+    "run:dry": "node scripts/daily-briefing.js --dry-run"
+  },
+  "keywords": ["openclaw", "skill", "briefing", "email", "news"],
+  "author": "Tuliptech",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}
