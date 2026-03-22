@@ -325,6 +325,36 @@ app.get('/api/source-types', (req, res) => {
 const { execSync } = require('child_process');
 const EXEC_OPTS = { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 };
 
+// Gateway configuration
+const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || 'http://localhost:18789';
+const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || null;
+
+// Helper: call Gateway HTTP API
+async function callGateway(endpoint, method = 'GET', body = null) {
+  const url = `${GATEWAY_URL}${endpoint}`;
+  const options = {
+    method,
+    headers: {}
+  };
+  
+  if (GATEWAY_TOKEN) {
+    options.headers['Authorization'] = `Bearer ${GATEWAY_TOKEN}`;
+  }
+  
+  if (body) {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(body);
+  }
+  
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Gateway API error (${response.status}): ${error}`);
+  }
+  
+  return response.json();
+}
+
 // Helper: run openclaw cron command
 function runCronCmd(args) {
   try {
@@ -336,11 +366,10 @@ function runCronCmd(args) {
 }
 
 // GET /api/cron - List OpenClaw cron jobs for briefings
-app.get('/api/cron', (req, res) => {
+app.get('/api/cron', async (req, res) => {
   try {
-    const result = execSync('openclaw cron list --json 2>/dev/null || echo "[]"', EXEC_OPTS);
-    const jobs = JSON.parse(result);
-    const briefingJobs = (jobs.jobs || jobs || []).filter(j => 
+    const result = await callGateway('/gateway/cron/list');
+    const briefingJobs = (result.jobs || []).filter(j => 
       j.name?.startsWith('daily-briefing-') || j.name === 'daily-briefing'
     );
     res.json({ success: true, jobs: briefingJobs });
@@ -364,12 +393,11 @@ app.post('/api/briefs/:id/cron', async (req, res) => {
   
   try {
     // Check if job exists and remove it
-    const listResult = execSync('openclaw cron list --json 2>/dev/null || echo "[]"', EXEC_OPTS);
-    const jobs = JSON.parse(listResult);
-    const existingJob = (jobs.jobs || jobs || []).find(j => j.name === jobName);
+    const listResult = await callGateway('/gateway/cron/list');
+    const existingJob = (listResult.jobs || []).find(j => j.name === jobName);
     
     if (existingJob) {
-      execSync(`openclaw cron rm "${existingJob.id}" 2>/dev/null`, EXEC_OPTS);
+      await callGateway(`/gateway/cron/remove/${existingJob.id}`, 'POST');
     }
 
     // Build delivery target
@@ -392,38 +420,34 @@ app.post('/api/briefs/:id/cron', async (req, res) => {
       enabled: brief.enabled !== false
     };
 
-    const addResult = execSync(
-      `openclaw cron add '${JSON.stringify(jobPayload)}' 2>&1`,
-      EXEC_OPTS
-    );
+    const addResult = await callGateway('/gateway/cron/add', 'POST', jobPayload);
 
     res.json({
       success: true,
       message: existingJob ? 'Cron job updated' : 'Cron job created',
       jobName,
+      jobId: addResult.id || addResult.jobId,
       schedule: brief.schedule,
-      timezone: brief.timezone || 'Europe/London',
-      output: addResult.trim()
+      timezone: brief.timezone || 'Europe/London'
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: err.message, details: err.stack });
   }
 });
 
 // DELETE /api/briefs/:id/cron - Remove OpenClaw cron job for a brief
-app.delete('/api/briefs/:id/cron', (req, res) => {
+app.delete('/api/briefs/:id/cron', async (req, res) => {
   const jobName = `daily-briefing-${req.params.id}`;
   
   try {
-    const listResult = execSync('openclaw cron list --json 2>/dev/null || echo "[]"', EXEC_OPTS);
-    const jobs = JSON.parse(listResult);
-    const existingJob = (jobs.jobs || jobs || []).find(j => j.name === jobName);
+    const listResult = await callGateway('/gateway/cron/list');
+    const existingJob = (listResult.jobs || []).find(j => j.name === jobName);
     
     if (!existingJob) {
       return res.status(404).json({ success: false, error: 'No cron job found for this brief' });
     }
 
-    execSync(`openclaw cron rm "${existingJob.id}" 2>/dev/null`, EXEC_OPTS);
+    await callGateway(`/gateway/cron/remove/${existingJob.id}`, 'POST');
     
     res.json({ success: true, message: 'Cron job removed', jobName });
   } catch (err) {
@@ -432,19 +456,18 @@ app.delete('/api/briefs/:id/cron', (req, res) => {
 });
 
 // POST /api/briefs/:id/cron/run - Trigger OpenClaw cron job immediately
-app.post('/api/briefs/:id/cron/run', (req, res) => {
+app.post('/api/briefs/:id/cron/run', async (req, res) => {
   const jobName = `daily-briefing-${req.params.id}`;
   
   try {
-    const listResult = execSync('openclaw cron list --json 2>/dev/null || echo "[]"', EXEC_OPTS);
-    const jobs = JSON.parse(listResult);
-    const existingJob = (jobs.jobs || jobs || []).find(j => j.name === jobName);
+    const listResult = await callGateway('/gateway/cron/list');
+    const existingJob = (listResult.jobs || []).find(j => j.name === jobName);
     
     if (!existingJob) {
       return res.status(404).json({ success: false, error: 'No cron job found for this brief' });
     }
 
-    execSync(`openclaw cron run "${existingJob.id}" 2>/dev/null`, EXEC_OPTS);
+    await callGateway(`/gateway/cron/run/${existingJob.id}`, 'POST');
     
     res.json({ success: true, message: 'Cron job triggered', jobId: existingJob.id });
   } catch (err) {
