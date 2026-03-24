@@ -416,7 +416,7 @@ app.post('/api/briefs/:id/cron', async (req, res) => {
 
     // Build delivery target
     const deliveryTo = brief.delivery?.recipients?.join(', ') || 'configured recipients';
-    const message = `Run the daily briefing "${brief.name}" (ID: ${brief.id}). Use the daily-briefing skill to run this brief and send to ${deliveryTo}. Reply with NO_REPLY after completion.`;
+    const message = `Run the daily briefing ${brief.name} ID ${brief.id}. Use the daily-briefing skill to run this brief and send to ${deliveryTo}. Reply with NO_REPLY after completion.`;
     
     // Create cron job via CLI (more reliable than HTTP API)
     const cronCmd = [
@@ -424,7 +424,7 @@ app.post('/api/briefs/:id/cron', async (req, res) => {
       `--name "${jobName}"`,
       `--cron "${brief.schedule}"`,
       `--tz "${brief.timezone || 'Europe/London'}"`,
-      `--message "${message.replace(/"/g, '\\"')}"`,
+      `--message "${message}"`,
       '--session isolated',
       '--agent max',
       '--timeout 300',
