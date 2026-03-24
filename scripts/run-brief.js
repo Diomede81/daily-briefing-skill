@@ -10,6 +10,7 @@ const fs = require('fs');
 const path = require('path');
 const configManager = require('../lib/config-manager');
 const adapters = require('../lib/adapters');
+const { summarizeSections } = require('../lib/summarizer');
 
 const MIDDLEWARE_API = process.env.MIDDLEWARE_API || 'http://localhost:3007/api';
 
@@ -51,8 +52,25 @@ async function runBrief(briefId) {
     process.exit(1);
   }
 
+  // AI Summarization (if enabled in brief config)
+  let enhancedSections = sections;
+  if (brief.aiSummary?.enabled !== false) {
+    console.log('\n🤖 Running AI summarization...');
+    try {
+      enhancedSections = await summarizeSections(sections, {
+        style: brief.aiSummary?.style || 'concise',
+        maxItemsPerSource: brief.aiSummary?.maxItemsPerSource || 5,
+        prioritize: brief.aiSummary?.prioritize || 'relevance',
+        userContext: brief.aiSummary?.userContext
+      });
+    } catch (err) {
+      console.warn('⚠️ AI summarization failed:', err.message);
+      enhancedSections = sections; // Fallback to original
+    }
+  }
+
   // Build HTML email
-  const html = buildEmailHTML(brief, sections);
+  const html = buildEmailHTML(brief, enhancedSections);
 
   // Send email
   if (!brief.delivery?.recipients?.length) {
@@ -101,7 +119,8 @@ function getSourceIcon(type) {
     'calendar': '📅',
     'tasks': '✅',
     'podcast': '🎙️',
-    'weather': '🌤️'
+    'weather': '🌤️',
+    'youtube': '🎬'
   };
   return icons[type] || '📄';
 }
@@ -175,17 +194,59 @@ function buildEmailHTML(brief, sections) {
         if (item.duration) html += ` <span style="color: #666;">(${item.duration})</span>`;
         if (item.description) html += `<div class="meta">${item.description}</div>`;
         html += `</div>`;
-      } else {
-        // Default for rss, web-json, email
+      } else if (section.type === 'youtube') {
+        // YouTube transcripts
         html += `<div class="item">`;
+        html += `<strong>${item.title}</strong>`;
+        
+        // AI Summary (if available)
+        if (item.aiSummary) {
+          html += `<div style="margin-top: 8px; padding: 10px; background: #f0f8ff; border-left: 3px solid #007bff; border-radius: 4px;">`;
+          html += `<strong style="color: #007bff;">📝 Summary:</strong> ${item.aiSummary}`;
+          html += `</div>`;
+        } else if (item.description) {
+          // Fallback to description if no AI summary
+          html += `<div class="meta" style="margin-top: 8px; color: #333;">${item.description}</div>`;
+        }
+        
+        // Link to video
+        if (item.url) {
+          html += `<div class="meta" style="margin-top: 8px;">→ <a href="${item.url}">Watch video</a></div>`;
+        }
+        html += `</div>`;
+      } else {
+        // Default for rss, web-json, email, podcast (with fallback)
+        html += `<div class="item">`;
+        
+        // Title with link
         if (item.url) {
           html += `<a href="${item.url}">${item.title}</a>`;
         } else {
           html += `<strong>${item.title}</strong>`;
         }
+        
+        // Metadata (author, from)
         if (item.from) html += `<div class="meta">From: ${item.from}</div>`;
         if (item.author) html += `<div class="meta">By ${item.author}</div>`;
-        if (item.preview) html += `<div class="meta">${item.preview}</div>`;
+        
+        // AI Summary (highlighted) or fallback to description/preview
+        if (item.aiSummary) {
+          html += `<div style="margin-top: 8px; padding: 10px; background: #f0f8ff; border-left: 3px solid #007bff; border-radius: 4px;">`;
+          html += `<strong style="color: #007bff;">📝 Summary:</strong> ${item.aiSummary}`;
+          html += `</div>`;
+          // Still show original preview/description below summary (smaller)
+          if (item.description || item.preview) {
+            const originalText = item.description || item.preview;
+            html += `<details style="margin-top: 5px;"><summary style="cursor: pointer; color: #666; font-size: 12px;">Original content</summary>`;
+            html += `<div class="meta" style="margin-top: 5px; color: #666;">${originalText}</div>`;
+            html += `</details>`;
+          }
+        } else {
+          // No AI summary - show description/preview
+          if (item.description) html += `<div class="meta" style="margin-top: 5px; color: #333;">${item.description}</div>`;
+          if (item.preview) html += `<div class="meta">${item.preview}</div>`;
+        }
+        
         html += `</div>`;
       }
     }
