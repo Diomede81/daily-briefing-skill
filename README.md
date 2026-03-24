@@ -424,7 +424,7 @@ curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: app
 | `MIDDLEWARE_API` | `http://localhost:3007/api` | Microsoft Middleware URL |
 | `CONFIG_DIR` | `./config` | Config storage directory |
 | `TZ` | `Europe/London` | Default timezone |
-| `TODOIST_SCRIPT` | `~/clawd/todoist.js` | Todoist CLI path (customize for your setup) |
+| `TODOIST_SCRIPT` | `todoist` | Todoist CLI command or script path |
 
 ---
 
