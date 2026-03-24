@@ -413,11 +413,12 @@ app.post('/api/briefs/:id/cron', async (req, res) => {
       },
       payload: {
         kind: 'agentTurn',
-        message: `Run the daily briefing "${brief.name}" (ID: ${brief.id}). Use the daily-briefing skill to run this brief and send to ${deliveryTo}.`,
+        message: `Run the daily briefing "${brief.name}" (ID: ${brief.id}). Use the daily-briefing skill to run this brief and send to ${deliveryTo}. Reply with NO_REPLY after completion to suppress response delivery.`,
         timeoutSeconds: 300
       },
       sessionTarget: 'isolated',
-      enabled: brief.enabled !== false
+      enabled: brief.enabled !== false,
+      deliverTo: null  // Suppress response delivery (no WhatsApp/Teams/etc)
     };
 
     const addResult = await callGateway('/gateway/cron/add', 'POST', jobPayload);
