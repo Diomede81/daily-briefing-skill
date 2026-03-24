@@ -392,42 +392,67 @@ app.post('/api/briefs/:id/cron', async (req, res) => {
   const jobName = `daily-briefing-${brief.id}`;
   
   try {
-    // Check if job exists and remove it
-    const listResult = await callGateway('/gateway/cron/list');
-    const existingJob = (listResult.jobs || []).find(j => j.name === jobName);
-    
-    if (existingJob) {
-      await callGateway(`/gateway/cron/remove/${existingJob.id}`, 'POST');
+    // Check if job exists and remove it (using CLI)
+    try {
+      const listOutput = execSync('openclaw cron list --format json 2>&1', { 
+        encoding: 'utf8',
+        maxBuffer: 10 * 1024 * 1024 
+      });
+      
+      // Parse output - skip any warnings/errors at start
+      const jsonStart = listOutput.indexOf('[');
+      if (jsonStart !== -1) {
+        const jobs = JSON.parse(listOutput.substring(jsonStart));
+        const existingJob = jobs.find(j => j.name === jobName);
+        
+        if (existingJob && existingJob.id) {
+          execSync(`openclaw cron rm "${existingJob.id}" 2>/dev/null`, { encoding: 'utf8' });
+        }
+      }
+    } catch (listErr) {
+      // Ignore list/remove errors - job probably doesn't exist
+      console.log('Cron list/remove note:', listErr.message);
     }
 
     // Build delivery target
     const deliveryTo = brief.delivery?.recipients?.join(', ') || 'configured recipients';
+    const message = `Run the daily briefing "${brief.name}" (ID: ${brief.id}). Use the daily-briefing skill to run this brief and send to ${deliveryTo}. Reply with NO_REPLY after completion.`;
     
-    // Create cron job
-    const jobPayload = {
-      name: jobName,
-      schedule: {
-        kind: 'cron',
-        expr: brief.schedule,
-        tz: brief.timezone || 'Europe/London'
-      },
-      payload: {
-        kind: 'agentTurn',
-        message: `Run the daily briefing "${brief.name}" (ID: ${brief.id}). Use the daily-briefing skill to run this brief and send to ${deliveryTo}. Reply with NO_REPLY after completion to suppress response delivery.`,
-        timeoutSeconds: 300
-      },
-      sessionTarget: 'isolated',
-      enabled: brief.enabled !== false,
-      deliverTo: null  // Suppress response delivery (no WhatsApp/Teams/etc)
-    };
-
-    const addResult = await callGateway('/gateway/cron/add', 'POST', jobPayload);
+    // Create cron job via CLI (more reliable than HTTP API)
+    const cronCmd = [
+      'openclaw cron add',
+      `--name "${jobName}"`,
+      `--cron "${brief.schedule}"`,
+      `--tz "${brief.timezone || 'Europe/London'}"`,
+      `--message "${message.replace(/"/g, '\\"')}"`,
+      '--session isolated',
+      '--agent max',
+      '--timeout 300',
+      '2>&1'
+    ].join(' ');
+    
+    const cronOutput = execSync(cronCmd, { 
+      encoding: 'utf8',
+      maxBuffer: 10 * 1024 * 1024 
+    });
+    
+    // Parse job ID from output
+    let jobId = null;
+    try {
+      const jsonStart = cronOutput.indexOf('{');
+      if (jsonStart !== -1) {
+        const result = JSON.parse(cronOutput.substring(jsonStart));
+        jobId = result.id;
+      }
+    } catch (parseErr) {
+      // Couldn't parse ID, but job was created
+    }
 
     res.json({
       success: true,
-      message: existingJob ? 'Cron job updated' : 'Cron job created',
+      message: 'Cron job created',
       jobName,
-      jobId: addResult.id || addResult.jobId,
+      jobId,
       schedule: brief.schedule,
       timezone: brief.timezone || 'Europe/London'
     });
