@@ -130,7 +130,80 @@
         "timestamp": "2026-03-24T07:26:00.880Z"
       },
       "id": "1cd65ac0",
-      "createdAt": "2026-03-24T07:19:48.615Z"
+      "createdAt": "2026-03-24T07:19:48.615Z",
+      "aiSummary": {
+        "enabled": true,
+        "style": "concise",
+        "maxItemsPerSource": 5,
+        "prioritize": "relevance",
+        "userContext": "Tech entrepreneur and CTO interested in AI, healthcare technology (especially care home/medication management), business automation, Microsoft 365 ecosystem, and productivity tools. Runs Empathika (care tech SaaS), Tuliptech (Microsoft services), and Acuity AI (AI consultancy)."
+      },
+      "updatedAt": "2026-03-24T12:37:41.062Z"
+    },
+    {
+      "name": "Test from Mission Control",
+      "enabled": false,
+      "schedule": "00 10 * * *",
+      "timezone": "Europe/London",
+      "delivery": {
+        "agent": "max",
+        "recipients": [
+          "llicata@tulip-tech.com"
+        ]
+      },
+      "sources": [
+        {
+          "name": "HN",
+          "type": "rss",
+          "url": "https://news.ycombinator.com/rss",
+          "enabled": true,
+          "config": {
+            "maxItems": 5
+          }
+        }
+      ],
+      "lastRun": {
+        "success": true,
+        "output": "🚀 Running brief: 3d0d24b6\n📋 Brief: Test from Mission Control\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: HN (rss)\n   ✅ 5 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 1\n   Total items: 5\n✅ Brief complete!\n",
+        "timestamp": "2026-03-24T12:31:51.252Z"
+      },
+      "id": "3d0d24b6",
+      "createdAt": "2026-03-24T12:14:12.140Z"
+    },
+    {
+      "name": "Daily Briefing",
+      "enabled": true,
+      "schedule": "40 12 * * *",
+      "timezone": "Europe/London",
+      "delivery": {
+        "agent": "max",
+        "recipients": [
+          "llicata@tulip-tech.com"
+        ]
+      },
+      "sources": [
+        {
+          "id": "1774355461413",
+          "name": "Diary",
+          "type": "youtube",
+          "url": "https://www.youtube.com/watch?v=fpETS6q1Hww",
+          "enabled": true
+        }
+      ],
+      "lastRun": {
+        "success": true,
+        "output": "🚀 Running brief: db4db64d\n📋 Brief: Daily Briefing\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: Diary (youtube)\nFetching transcript for video: fpETS6q1Hww\n\n=== VIDEO: fpETS6q1Hww ===\nAvailable: English (auto-generated) (auto)\nLength: 3707 segments\n\n   ✅ 1 items\n\n🤖 Running AI summarization...\n🤖 AI Summarization enabled\n   Processing: Diary (1 items)\n   ✅ Summarized 1 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 1\n   Total items: 1\n✅ Brief complete!\n",
+        "timestamp": "2026-03-24T12:40:15.333Z"
+      },
+      "id": "db4db64d",
+      "createdAt": "2026-03-24T12:31:04.488Z",
+      "aiSummary": {
+        "enabled": true,
+        "style": "detailed",
+        "maxItemsPerSource": 1,
+        "userContext": "Business leader interested in entrepreneurship, leadership, personal development, and business strategy"
+      },
+      "updatedAt": "2026-03-24T12:40:37.547Z"
     }
   ],
   "sourceTemplates": {},
