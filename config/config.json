@@ -3,20 +3,140 @@
   "defaultTimezone": "Europe/London",
   "briefs": [
     {
-      "name": "Morning Tech Brief",
+      "name": "Daily Briefing",
       "enabled": true,
-      "schedule": "0 7 * * *",
+      "schedule": "00 08 * * *",
       "timezone": "Europe/London",
       "delivery": {
         "agent": "max",
         "recipients": [
-          "luca@example.com"
+          "lucalicata@hotmail.com"
         ]
       },
-      "sources": [],
-      "lastRun": null,
+      "sources": [
+        {
+          "id": "7adb6a16",
+          "name": "BBC Technology News",
+          "type": "rss",
+          "url": "http://feeds.bbci.co.uk/news/technology/rss.xml",
+          "config": {
+            "maxItems": 10
+          },
+          "lastTest": null,
+          "enabled": true,
+          "createdAt": "2026-03-24T08:02:31.500Z"
+        },
+        {
+          "id": "f66c2e43",
+          "name": "TechCrunch AI",
+          "type": "rss",
+          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+          "config": {
+            "maxItems": 10
+          },
+          "lastTest": null,
+          "enabled": true,
+          "createdAt": "2026-03-24T08:02:35.900Z"
+        }
+      ],
+      "lastRun": {
+        "success": false,
+        "output": "🚀 Running brief: 38cdfbc6\n📋 Brief: Daily Briefing\n📧 Recipients: lucalicata@hotmail.com\n📡 Fetching: Youtube (youtube)\n   ⚠️ Failed: Unknown source type: youtube\n📡 Fetching: BBC (scrape)\n   ⚠️ Failed: Unknown source type: scrape\n❌ No content collected\n",
+        "timestamp": "2026-03-24T08:00:00.040Z"
+      },
       "id": "38cdfbc6",
-      "createdAt": "2026-03-20T11:46:56.899Z"
+      "createdAt": "2026-03-20T11:46:56.899Z",
+      "updatedAt": "2026-03-24T07:54:31.784Z"
+    },
+    {
+      "name": "Luca Morning Brief",
+      "enabled": true,
+      "schedule": "30 9 * * *",
+      "timezone": "Europe/London",
+      "delivery": {
+        "agent": "max",
+        "recipients": [
+          "llicata@tulip-tech.com"
+        ]
+      },
+      "sources": [
+        {
+          "id": "646e3c07",
+          "name": "TechCrunch AI",
+          "type": "rss",
+          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+          "config": {
+            "maxItems": 5
+          },
+          "lastTest": null,
+          "enabled": true,
+          "createdAt": "2026-03-24T07:19:53.883Z"
+        },
+        {
+          "id": "5dd0907a",
+          "name": "Email Newsletters",
+          "type": "email",
+          "url": "inbox",
+          "config": {
+            "agent": "luca",
+            "senders": [
+              "newsletter",
+              "digest",
+              "morning",
+              "briefing"
+            ],
+            "maxAge": "24h"
+          },
+          "lastTest": null,
+          "enabled": true,
+          "createdAt": "2026-03-24T07:25:23.745Z"
+        },
+        {
+          "id": "7f26fa3f",
+          "name": "The Diary of a CEO Podcast",
+          "type": "podcast",
+          "url": "https://feeds.megaphone.fm/diaryofaceo",
+          "config": {
+            "maxItems": 3
+          },
+          "lastTest": null,
+          "enabled": true,
+          "createdAt": "2026-03-24T07:25:37.424Z"
+        },
+        {
+          "id": "7383cac4",
+          "name": "Hacker News",
+          "type": "rss",
+          "url": "https://news.ycombinator.com/rss",
+          "config": {
+            "maxItems": 5
+          },
+          "lastTest": null,
+          "enabled": true,
+          "createdAt": "2026-03-24T07:25:46.634Z"
+        },
+        {
+          "id": "38c37e87",
+          "name": "Today Calendar",
+          "type": "calendar",
+          "url": "calendar",
+          "config": {
+            "agent": "luca",
+            "days": 1,
+            "includeAllDay": true
+          },
+          "lastTest": null,
+          "enabled": true,
+          "createdAt": "2026-03-24T07:25:46.635Z"
+        }
+      ],
+      "lastRun": {
+        "success": true,
+        "output": "🚀 Running brief: 1cd65ac0\n📋 Brief: Luca Morning Brief\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: TechCrunch AI (rss)\n   ✅ 5 items\n📡 Fetching: Email Newsletters (email)\n   ⚠️ Failed: No items\n📡 Fetching: The Diary of a CEO Podcast (podcast)\n   ⚠️ Failed: No items\n📡 Fetching: Hacker News (rss)\n   ✅ 5 items\n📡 Fetching: Today Calendar (calendar)\n   ✅ 6 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 3\n   Total items: 16\n✅ Brief complete!\n",
+        "timestamp": "2026-03-24T07:26:00.880Z"
+      },
+      "id": "1cd65ac0",
+      "createdAt": "2026-03-24T07:19:48.615Z"
     }
   ],
   "sourceTemplates": {},
