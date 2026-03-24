@@ -15,28 +15,22 @@
       },
       "sources": [
         {
-          "id": "7adb6a16",
           "name": "BBC Technology News",
           "type": "rss",
           "url": "http://feeds.bbci.co.uk/news/technology/rss.xml",
+          "enabled": true,
           "config": {
             "maxItems": 10
-          },
-          "lastTest": null,
-          "enabled": true,
-          "createdAt": "2026-03-24T08:02:31.500Z"
+          }
         },
         {
-          "id": "f66c2e43",
-          "name": "TechCrunch AI",
+          "name": "Hacker News",
           "type": "rss",
-          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+          "url": "https://news.ycombinator.com/rss",
+          "enabled": true,
           "config": {
             "maxItems": 10
-          },
-          "lastTest": null,
-          "enabled": true,
-          "createdAt": "2026-03-24T08:02:35.900Z"
+          }
         }
       ],
       "lastRun": {

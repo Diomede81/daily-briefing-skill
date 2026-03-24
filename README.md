@@ -25,10 +25,16 @@ cd daily-briefing-skill
 # Install
 npm install
 
+# Configuration (first time)
+cp config/config.template.json config/config.json
+# Edit config.json with your briefs, sources, and email addresses
+
 # Start API server (includes scheduler)
 npm start
 # → http://localhost:3020
 ```
+
+**Note:** `config/config.json` contains runtime state (lastRun timestamps, brief IDs) and is git-ignored. Use the template to set up your own configuration.
 
 ---
 
@@ -418,7 +424,7 @@ curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: app
 | `MIDDLEWARE_API` | `http://localhost:3007/api` | Microsoft Middleware URL |
 | `CONFIG_DIR` | `./config` | Config storage directory |
 | `TZ` | `Europe/London` | Default timezone |
-| `TODOIST_SCRIPT` | `/home/lucalicata/clawd/todoist.js` | Todoist CLI path |
+| `TODOIST_SCRIPT` | `todoist` | Todoist CLI command or script path |
 
 ---
 
