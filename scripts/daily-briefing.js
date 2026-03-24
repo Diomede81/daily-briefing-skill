@@ -30,7 +30,7 @@ const CONFIG = {
   SEND_FROM_AGENT: process.env.SEND_FROM_AGENT || 'max',
   
   // Recipient email address
-  SEND_TO: process.env.SEND_TO || 'llicata@tulip-tech.com',
+  SEND_TO: process.env.SEND_TO || 'user@example.com',
   
   // Agent whose inbox to scan for newsletters
   INBOX_AGENT: process.env.INBOX_AGENT || 'luca',
