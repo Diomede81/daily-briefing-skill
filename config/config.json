@@ -34,9 +34,9 @@
         }
       ],
       "lastRun": {
-        "success": false,
-        "output": "🚀 Running brief: 38cdfbc6\n📋 Brief: Daily Briefing\n📧 Recipients: lucalicata@hotmail.com\n📡 Fetching: Youtube (youtube)\n   ⚠️ Failed: Unknown source type: youtube\n📡 Fetching: BBC (scrape)\n   ⚠️ Failed: Unknown source type: scrape\n❌ No content collected\n",
-        "timestamp": "2026-03-24T08:00:00.040Z"
+        "success": true,
+        "output": "🚀 Running brief: 38cdfbc6\n📋 Brief: Daily Briefing\n📧 Recipients: lucalicata@hotmail.com\n📡 Fetching: BBC Technology News (rss)\n   ✅ 10 items\n📡 Fetching: Hacker News (rss)\n   ✅ 10 items\n\n🤖 Running AI summarization...\n🤖 AI Summarization enabled\n   Processing: BBC Technology News (10 items)\n   ✅ Summarized 5 items\n   Processing: Hacker News (10 items)\n   ✅ Summarized 5 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 2\n   Total items: 20\n✅ Brief complete!\n",
+        "timestamp": "2026-03-25T08:00:13.098Z"
       },
       "id": "38cdfbc6",
       "createdAt": "2026-03-20T11:46:56.899Z",
@@ -89,7 +89,7 @@
           "id": "7f26fa3f",
           "name": "The Diary of a CEO Podcast",
           "type": "podcast",
-          "url": "https://feeds.megaphone.fm/diaryofaceo",
+          "url": "https://rss2.flightcast.com/xmsftuzjjykcmqwolaqn6mdn",
           "config": {
             "maxItems": 3
           },
@@ -126,8 +126,8 @@
       ],
       "lastRun": {
         "success": true,
-        "output": "🚀 Running brief: 1cd65ac0\n📋 Brief: Luca Morning Brief\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: TechCrunch AI (rss)\n   ✅ 5 items\n📡 Fetching: Email Newsletters (email)\n   ⚠️ Failed: No items\n📡 Fetching: The Diary of a CEO Podcast (podcast)\n   ⚠️ Failed: No items\n📡 Fetching: Hacker News (rss)\n   ✅ 5 items\n📡 Fetching: Today Calendar (calendar)\n   ✅ 6 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 3\n   Total items: 16\n✅ Brief complete!\n",
-        "timestamp": "2026-03-24T07:26:00.880Z"
+        "output": "🚀 Running brief: 1cd65ac0\n📋 Brief: Luca Morning Brief\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: TechCrunch AI (rss)\n   ✅ 5 items\n📡 Fetching: Email Newsletters (email)\n   ⚠️ Failed: No items\n📡 Fetching: The Diary of a CEO Podcast (podcast)\n   ⚠️ Failed: No items\n📡 Fetching: Hacker News (rss)\n   ✅ 5 items\n📡 Fetching: Today Calendar (calendar)\n   ✅ 10 items\n\n🤖 Running AI summarization...\n🤖 AI Summarization enabled\n   Processing: TechCrunch AI (5 items)\n   ✅ Summarized 5 items\n   Processing: Hacker News (5 items)\n   ✅ Summarized 5 items\n   Processing: Today Calendar (10 items)\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 3\n   Total items: 20\n✅ Brief complete!\n",
+        "timestamp": "2026-03-25T09:30:20.619Z"
       },
       "id": "1cd65ac0",
       "createdAt": "2026-03-24T07:19:48.615Z",
@@ -138,7 +138,7 @@
         "prioritize": "relevance",
         "userContext": "Tech entrepreneur and CTO interested in AI, healthcare technology (especially care home/medication management), business automation, Microsoft 365 ecosystem, and productivity tools. Runs Empathika (care tech SaaS), Tuliptech (Microsoft services), and Acuity AI (AI consultancy)."
       },
-      "updatedAt": "2026-03-24T12:37:41.062Z"
+      "updatedAt": "2026-03-25T09:44:50.207Z"
     },
     {
       "name": "Test from Mission Control",
@@ -204,6 +204,45 @@
         "userContext": "Business leader interested in entrepreneurship, leadership, personal development, and business strategy"
       },
       "updatedAt": "2026-03-24T12:40:37.547Z"
+    },
+    {
+      "name": "Daily Briefing",
+      "enabled": true,
+      "schedule": "00 14 * * *",
+      "timezone": "Europe/London",
+      "delivery": {
+        "agent": "max",
+        "recipients": [
+          "llicata@tulip-tech.com"
+        ]
+      },
+      "sources": [
+        {
+          "id": "1774359703587",
+          "name": "Diary",
+          "type": "youtube",
+          "url": "https://www.youtube.com/watch?v=fpETS6q1Hww",
+          "enabled": true
+        },
+        {
+          "id": "1774359724489",
+          "name": "BBC Technology",
+          "type": "scrape",
+          "url": "https://www.bbc.co.uk/news/technology",
+          "enabled": true,
+          "config": {
+            "maxItems": 5
+          }
+        }
+      ],
+      "lastRun": {
+        "success": true,
+        "output": "🚀 Running brief: 0572d681\n📋 Brief: Daily Briefing\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: Diary (youtube)\nFetching transcript for video: fpETS6q1Hww\n\n=== VIDEO: fpETS6q1Hww ===\nAvailable: English (auto-generated) (auto)\nLength: 3707 segments\n\n   ✅ 1 items\n📡 Fetching: BBC (scrape)\n   ⚠️ Failed: Unknown source type: scrape\n\n🤖 Running AI summarization...\n🤖 AI Summarization enabled\n   Processing: Diary (1 items)\n   ✅ Summarized 1 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 1\n   Total items: 1\n✅ Brief complete!\n",
+        "timestamp": "2026-03-24T14:05:35.432Z"
+      },
+      "id": "0572d681",
+      "createdAt": "2026-03-24T13:43:07.278Z",
+      "updatedAt": "2026-03-24T14:12:01.048Z"
     }
   ],
   "sourceTemplates": {},

@@ -120,7 +120,9 @@ function getSourceIcon(type) {
     'tasks': '✅',
     'podcast': '🎙️',
     'weather': '🌤️',
-    'youtube': '🎬'
+    'youtube': '🎬',
+    'scrape': '🔍',
+    'web': '🔍'
   };
   return icons[type] || '📄';
 }

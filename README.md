@@ -467,6 +467,66 @@ curl -X POST http://localhost:3020/api/briefs/{id}/sources -H "Content-Type: app
 
 ---
 
+## Running the API Server
+
+The API server (port 3020) must be running for:
+- The scheduler to execute briefs
+- Mission Control dashboard to manage briefs
+- API endpoints to work
+
+### Option 1: systemd Service (Recommended for production)
+
+Create `/home/YOUR_USER/.config/systemd/user/daily-briefing-api.service`:
+
+```ini
+[Unit]
+Description=Daily Briefing API Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/path/to/daily-briefing-skill
+ExecStart=/path/to/node_modules/.bin/npm start
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+```
+
+Then enable and start:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable daily-briefing-api
+systemctl --user start daily-briefing-api
+systemctl --user status daily-briefing-api
+```
+
+### Option 2: Manual Start (Development)
+
+```bash
+npm start
+# Or with logs:
+npm start > daily-briefing.log 2>&1 &
+```
+
+### Verify It's Running
+
+```bash
+# Check port 3020 is listening
+lsof -i :3020
+
+# Test API
+curl http://localhost:3020/api/briefs
+```
+
+**⚠️ Important:** If Mission Control dashboard shows "Failed to fetch briefs" (500 error), the API server is not running. Start it using one of the methods above.
+
+---
+
 ## Documentation
 
 - **[AI Summarization Guide](docs/ai-summarization.md)** - Complete feature documentation
@@ -497,6 +557,47 @@ daily-briefing-skill/
 │       └── index.js      # Source type parsers
 └── docs/
     └── ai-summarization.md  # AI feature guide
+```
+
+---
+
+## Troubleshooting
+
+### Mission Control Shows "Failed to fetch briefs" (500 error)
+
+**Cause:** The daily-briefing API server (port 3020) is not running.
+
+**Fix:**
+```bash
+# Check if running
+lsof -i :3020
+
+# If not running, start it
+systemctl --user start daily-briefing-api
+# OR
+cd /path/to/daily-briefing-skill && npm start
+```
+
+### Briefs Not Running on Schedule
+
+1. Check if API server is running (`lsof -i :3020`)
+2. Check scheduler status: `curl http://localhost:3020/api/schedules`
+3. Check logs: `journalctl --user -u daily-briefing-api -f`
+
+### Source Fails to Fetch
+
+Test the source individually:
+```bash
+node -e "
+const { testSource } = require('./lib/adapters');
+(async () => {
+  const result = await testSource({
+    type: 'rss',
+    url: 'https://your-feed-url.com/rss'
+  });
+  console.log(JSON.stringify(result, null, 2));
+})();
+"
 ```
 
 ---
