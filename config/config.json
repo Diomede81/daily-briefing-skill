@@ -10,200 +10,50 @@
       "delivery": {
         "agent": "max",
         "recipients": [
-          "lucalicata@hotmail.com"
-        ]
-      },
-      "sources": [
-        {
-          "name": "BBC Technology News",
-          "type": "rss",
-          "url": "http://feeds.bbci.co.uk/news/technology/rss.xml",
-          "enabled": true,
-          "config": {
-            "maxItems": 10
-          }
-        },
-        {
-          "name": "Hacker News",
-          "type": "rss",
-          "url": "https://news.ycombinator.com/rss",
-          "enabled": true,
-          "config": {
-            "maxItems": 10
-          }
-        }
-      ],
-      "lastRun": {
-        "success": false,
-        "output": "🚀 Running brief: 38cdfbc6\n📋 Brief: Daily Briefing\n📧 Recipients: lucalicata@hotmail.com\n📡 Fetching: Youtube (youtube)\n   ⚠️ Failed: Unknown source type: youtube\n📡 Fetching: BBC (scrape)\n   ⚠️ Failed: Unknown source type: scrape\n❌ No content collected\n",
-        "timestamp": "2026-03-24T08:00:00.040Z"
-      },
-      "id": "38cdfbc6",
-      "createdAt": "2026-03-20T11:46:56.899Z",
-      "updatedAt": "2026-03-24T07:54:31.784Z"
-    },
-    {
-      "name": "Luca Morning Brief",
-      "enabled": true,
-      "schedule": "30 9 * * *",
-      "timezone": "Europe/London",
-      "delivery": {
-        "agent": "max",
-        "recipients": [
           "llicata@tulip-tech.com"
         ]
       },
       "sources": [
         {
-          "id": "646e3c07",
-          "name": "TechCrunch AI",
+          "id": "1774594050267",
+          "name": "BBC",
           "type": "rss",
-          "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
-          "config": {
-            "maxItems": 5
-          },
-          "lastTest": null,
-          "enabled": true,
-          "createdAt": "2026-03-24T07:19:53.883Z"
+          "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+          "enabled": true
         },
         {
-          "id": "5dd0907a",
-          "name": "Email Newsletters",
+          "id": "1774594134699",
+          "name": "My Email",
           "type": "email",
-          "url": "inbox",
           "config": {
             "agent": "luca",
             "senders": [
-              "newsletter",
-              "digest",
-              "morning",
-              "briefing"
+              "news@daily.therundown.ai",
+              "crew@technews.therundown.ai",
+              "hi@robotics.therundown.ai",
+              "agentai@mail.beehiiv.com"
             ],
             "maxAge": "24h"
           },
-          "lastTest": null,
-          "enabled": true,
-          "createdAt": "2026-03-24T07:25:23.745Z"
+          "enabled": true
         },
         {
-          "id": "7f26fa3f",
-          "name": "The Diary of a CEO Podcast",
-          "type": "podcast",
-          "url": "https://feeds.megaphone.fm/diaryofaceo",
-          "config": {
-            "maxItems": 3
-          },
-          "lastTest": null,
-          "enabled": true,
-          "createdAt": "2026-03-24T07:25:37.424Z"
-        },
-        {
-          "id": "7383cac4",
-          "name": "Hacker News",
+          "id": "1774594273002",
+          "name": "Wired",
           "type": "rss",
-          "url": "https://news.ycombinator.com/rss",
-          "config": {
-            "maxItems": 5
-          },
-          "lastTest": null,
-          "enabled": true,
-          "createdAt": "2026-03-24T07:25:46.634Z"
+          "url": "https://www.wired.com/feed/rss",
+          "enabled": true
         },
         {
-          "id": "38c37e87",
-          "name": "Today Calendar",
-          "type": "calendar",
-          "url": "calendar",
-          "config": {
-            "agent": "luca",
-            "days": 1,
-            "includeAllDay": true
-          },
-          "lastTest": null,
-          "enabled": true,
-          "createdAt": "2026-03-24T07:25:46.635Z"
-        }
-      ],
-      "lastRun": {
-        "success": true,
-        "output": "🚀 Running brief: 1cd65ac0\n📋 Brief: Luca Morning Brief\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: TechCrunch AI (rss)\n   ✅ 5 items\n📡 Fetching: Email Newsletters (email)\n   ⚠️ Failed: No items\n📡 Fetching: The Diary of a CEO Podcast (podcast)\n   ⚠️ Failed: No items\n📡 Fetching: Hacker News (rss)\n   ✅ 5 items\n📡 Fetching: Today Calendar (calendar)\n   ✅ 6 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 3\n   Total items: 16\n✅ Brief complete!\n",
-        "timestamp": "2026-03-24T07:26:00.880Z"
-      },
-      "id": "1cd65ac0",
-      "createdAt": "2026-03-24T07:19:48.615Z",
-      "aiSummary": {
-        "enabled": true,
-        "style": "concise",
-        "maxItemsPerSource": 5,
-        "prioritize": "relevance",
-        "userContext": "Tech entrepreneur and CTO interested in AI, healthcare technology (especially care home/medication management), business automation, Microsoft 365 ecosystem, and productivity tools. Runs Empathika (care tech SaaS), Tuliptech (Microsoft services), and Acuity AI (AI consultancy)."
-      },
-      "updatedAt": "2026-03-24T12:37:41.062Z"
-    },
-    {
-      "name": "Test from Mission Control",
-      "enabled": false,
-      "schedule": "00 10 * * *",
-      "timezone": "Europe/London",
-      "delivery": {
-        "agent": "max",
-        "recipients": [
-          "llicata@tulip-tech.com"
-        ]
-      },
-      "sources": [
-        {
-          "name": "HN",
+          "id": "1774594308622",
+          "name": "The Verge",
           "type": "rss",
-          "url": "https://news.ycombinator.com/rss",
-          "enabled": true,
-          "config": {
-            "maxItems": 5
-          }
-        }
-      ],
-      "lastRun": {
-        "success": true,
-        "output": "🚀 Running brief: 3d0d24b6\n📋 Brief: Test from Mission Control\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: HN (rss)\n   ✅ 5 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 1\n   Total items: 5\n✅ Brief complete!\n",
-        "timestamp": "2026-03-24T12:31:51.252Z"
-      },
-      "id": "3d0d24b6",
-      "createdAt": "2026-03-24T12:14:12.140Z"
-    },
-    {
-      "name": "Daily Briefing",
-      "enabled": true,
-      "schedule": "40 12 * * *",
-      "timezone": "Europe/London",
-      "delivery": {
-        "agent": "max",
-        "recipients": [
-          "llicata@tulip-tech.com"
-        ]
-      },
-      "sources": [
-        {
-          "id": "1774355461413",
-          "name": "Diary",
-          "type": "youtube",
-          "url": "https://www.youtube.com/watch?v=fpETS6q1Hww",
+          "url": "https://www.theverge.com/rss/index.xml",
           "enabled": true
         }
       ],
-      "lastRun": {
-        "success": true,
-        "output": "🚀 Running brief: db4db64d\n📋 Brief: Daily Briefing\n📧 Recipients: llicata@tulip-tech.com\n📡 Fetching: Diary (youtube)\nFetching transcript for video: fpETS6q1Hww\n\n=== VIDEO: fpETS6q1Hww ===\nAvailable: English (auto-generated) (auto)\nLength: 3707 segments\n\n   ✅ 1 items\n\n🤖 Running AI summarization...\n🤖 AI Summarization enabled\n   Processing: Diary (1 items)\n   ✅ Summarized 1 items\n✅ Email sent successfully\n\n📊 Summary:\n   Sections: 1\n   Total items: 1\n✅ Brief complete!\n",
-        "timestamp": "2026-03-24T12:40:15.333Z"
-      },
-      "id": "db4db64d",
-      "createdAt": "2026-03-24T12:31:04.488Z",
-      "aiSummary": {
-        "enabled": true,
-        "style": "detailed",
-        "maxItemsPerSource": 1,
-        "userContext": "Business leader interested in entrepreneurship, leadership, personal development, and business strategy"
-      },
-      "updatedAt": "2026-03-24T12:40:37.547Z"
+      "id": "1813c35a",
+      "createdAt": "2026-03-27T06:51:57.836Z"
     }
   ],
   "sourceTemplates": {},
