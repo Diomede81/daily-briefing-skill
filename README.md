@@ -73,13 +73,60 @@ node scripts/run-brief.js <briefId>
 
 ---
 
+## Production Setup (systemd)
+
+For automatic startup and restarts, set up a systemd service:
+
+```bash
+# Create service file
+cat > ~/.config/systemd/user/daily-briefing-api.service << 'EOF'
+[Unit]
+Description=Daily Briefing API Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/YOUR_USER/path/to/daily-briefing-skill
+ExecStart=/home/YOUR_USER/.nvm/versions/node/vX.X.X/bin/node scripts/server.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+Environment="NODE_ENV=production"
+Environment="MIDDLEWARE_API=http://localhost:3007/api"
+
+[Install]
+WantedBy=default.target
+EOF
+
+# Update paths in the service file above, then:
+systemctl --user daemon-reload
+systemctl --user enable daily-briefing-api
+systemctl --user start daily-briefing-api
+
+# Check status
+systemctl --user status daily-briefing-api
+
+# View logs
+journalctl --user -u daily-briefing-api -f
+```
+
+**Benefits:**
+- Auto-starts on boot
+- Auto-restarts if crashed
+- Logs to systemd journal
+- Managed lifecycle
+
+---
+
 ## Source Types
 
 | Type | Icon | Description | AI Summary | Example |
 |------|------|-------------|------------|---------|
-| `rss` | 📡 | RSS/Atom feeds | ✅ Yes | Substack, blogs, news |
-| `web-json` | 🌐 | Web pages with JSON | ✅ Yes | The Verge, modern sites |
-| `email` | 📧 | Newsletter inbox | ✅ Yes | Filter by sender |
+| `rss` | 📡 | RSS/Atom feeds (with attributes support) | ✅ Yes | Substack, blogs, The Verge |
+| `web-json` | 🌐 | Web pages with JSON | ✅ Yes | Modern sites with Next.js |
+| `email` | 📧 | Newsletter inbox (sender OR subject keywords) | ✅ Yes | Filter by sender + subject |
 | `podcast` | 🎙️ | Podcast episodes | ✅ Yes | Any podcast RSS |
 | `youtube` | 🎬 | YouTube transcripts | ✅ Yes | Full video transcript analysis |
 | `calendar` | 📅 | Calendar events | ⏭️ Skipped | Today's meetings (already formatted) |
@@ -267,7 +314,8 @@ curl -X POST http://localhost:3020/api/briefs/abc123/sources \
     "type": "email",
     "config": {
       "agent": "luca",
-      "senders": ["therundown", "morningbrew"],
+      "senders": ["therundown", "morningbrew", "beehiiv"],
+      "subjectKeywords": ["briefing", "news", "newsletter", "digest", "roundup", "update", "weekly", "daily"],
       "maxAge": "24h"
     }
   }'

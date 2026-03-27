@@ -33,6 +33,16 @@
               "hi@robotics.therundown.ai",
               "agentai@mail.beehiiv.com"
             ],
+            "subjectKeywords": [
+              "briefing",
+              "news",
+              "newsletter",
+              "digest",
+              "roundup",
+              "update",
+              "weekly",
+              "daily"
+            ],
             "maxAge": "24h"
           },
           "enabled": true
